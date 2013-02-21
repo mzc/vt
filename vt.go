@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"os/user"
 	"path"
+	"sort"
 	"strings"
 )
 
@@ -31,13 +32,13 @@ func join_str(s ...string) string {
 }
 
 func read_hosts(conf string) (err error) {
-
 	// config file example:
 	// [
-	//     { "host":"hm3" , "addr":"hm3"          , "domain":""             , "phost":"hm3", "port":"22"},
-	//     { "host":"mail", "addr":"hm3-0-mail-32", "domain":"hm3-0-mail-32", "phost":"hm3", "port":"22"},
-	//     { "host":"mow" , "addr":"hm3-1-mow-32" , "domain":"hm3-1-mow-32" , "phost":"hm3", "port":"22"}
+	//     { "host":"ha1"   , "addr":"203.81.XXX.50", "domain":""            , "phost":"ha1", "port":"2222"},
+	//     { "host":"v10000", "addr":"203.81.XXX.50", "domain":"ha1-0-v10000", "phost":"ha1", "port":"22210"},
+	//     { "host":"v10001", "addr":"203.81.XXX.50", "domain":"ha1-1-v10001", "phost":"ha1", "port":"22211"},
 	// ]
+
 	type H struct {
 		Host string   `json:"host"`
 		Addr string   `json:"addr"`
@@ -108,17 +109,54 @@ func ssh_hosts(addr, port, user, ssh_cmd string) error {
 }
 
 func show_hosts() {
+	hs := make([]string, len(hosts))
+
 	fmt.Println("Supported phost:")
+	i, l := 0, 0
 	for k, h := range hosts {
 		if is_phost(h) {
-			fmt.Println(k)
+			hs[i] = k
+			i++
+			
+			if len(k) > l {
+				l = len(k)
+			}
 		}
 	}
+	
+	sort.Strings(hs[0:i])
+	for j, h := range hs[0:i] {
+		fmt.Printf("%-*s", l + 1, h)
+		if (j + 1) % 7 == 0 {
+			fmt.Println("")
+		}
+	}
+	if i % 7 != 0 {
+		fmt.Println("")
+	}
+
 	fmt.Println("\nSupported vhost:")
+	i, l = 0, 0
 	for k, h := range hosts {
 		if !is_phost(h) {
-			fmt.Println(k)
+			hs[i] = k
+			i++
+
+			if len(k) > l {
+				l = len(k)
+			}
 		}
+	}
+
+	sort.Strings(hs[0:i])
+	for j, h := range hs[0:i] {
+		fmt.Printf("%-*s", l + 1, h)
+		if (j + 1) % 7 == 0 {
+			fmt.Println("")
+		}
+	}
+	if i % 7 != 0 {
+		fmt.Println("")
 	}
 }
 
