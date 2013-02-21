@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"os/user"
 	"path"
 	"strings"
 )
@@ -44,7 +45,7 @@ func read_hosts(conf string) (err error) {
 		Domain string `json:"domain"`
 		Phost string  `json:"phost"`
 	}
-
+	
 	b, err := ioutil.ReadFile(conf)
 	if err != nil {
 		return
@@ -124,7 +125,7 @@ func show_hosts() {
 func show_users() {
 	fmt.Println("Supported user shortcut:")
 	for k, u := range extend_user {
-		fmt.Printf("%s: %s\n", k, u)
+		fmt.Println(k, u)
 	}
 }
 
@@ -151,10 +152,16 @@ func main() {
 	args := os.Args
 	prog := path.Base(args[0])
 
-	conf := join_str(prog, ".json")
+	u, err := user.Current()
+	if err != nil {
+		fmt.Println("Cannot get current user info:", err)
+		return
+	}
+
+	conf := join_str(u.HomeDir, "/.config/", prog, "/", prog, ".json")
 	err = read_hosts(conf)
 	if err != nil {
-		fmt.Printf("Failed to read/parse config: %s\n", conf)
+		fmt.Println("Failed to read/parse", conf, ":", err)
 		return
 	}
 
@@ -202,10 +209,10 @@ func main() {
 		}
 		err = ssh_hosts(h.addr, h.port, user, cmd)
 	case "alias":
-		fmt.Printf("addr  : %s\n", h.addr)
-		fmt.Printf("port  : %s\n", h.port)
-		fmt.Printf("phost : %s\n", h.phost)
-		fmt.Printf("domain: %s\n", h.domain)
+		fmt.Println("addr  :", h.addr)
+		fmt.Println("port  :", h.port)
+		fmt.Println("phost :", h.phost)
+		fmt.Println("domain:", h.domain)
 	default:
 		usage(prog)
 	}
