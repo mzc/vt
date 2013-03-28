@@ -19,12 +19,12 @@ type Host struct {
 	phost  string
 }
 
-var hosts map[string] Host
+var hosts map[string]Host
 
-var extend_user = map[string] string {
-	"r" : "root",
-	"u" : "ubuntu",
-	"m" : "mulisu",
+var extend_user = map[string]string{
+	"r": "root",
+	"u": "ubuntu",
+	"m": "mulisu",
 }
 
 func join_str(s ...string) string {
@@ -40,13 +40,13 @@ func read_hosts(conf string) (err error) {
 	// ]
 
 	type H struct {
-		Host string   `json:"host"`
-		Addr string   `json:"addr"`
-		Port string   `json:"port"`
+		Host   string `json:"host"`
+		Addr   string `json:"addr"`
+		Port   string `json:"port"`
 		Domain string `json:"domain"`
-		Phost string  `json:"phost"`
+		Phost  string `json:"phost"`
 	}
-	
+
 	b, err := ioutil.ReadFile(conf)
 	if err != nil {
 		return
@@ -60,7 +60,7 @@ func read_hosts(conf string) (err error) {
 
 	hosts = make(map[string]Host)
 	for _, h := range hs {
-		hosts[h.Host] = Host{ h.Addr, h.Port, h.Domain, h.Phost }
+		hosts[h.Host] = Host{h.Addr, h.Port, h.Domain, h.Phost}
 	}
 	return
 }
@@ -75,7 +75,7 @@ func default_user() string {
 
 func ls_hosts(addr, port, user string) error {
 	uri := join_str("qemu+ssh://", user, "@", addr, ":", port, "/system")
- 	cmd := exec.Command("virsh", "-c", uri, "list --all")
+	cmd := exec.Command("virsh", "-c", uri, "list --all")
 	cmd.Stdout = os.Stdout
 
 	return cmd.Run()
@@ -117,21 +117,21 @@ func show_hosts() {
 		if is_phost(h) {
 			hs[i] = k
 			i++
-			
+
 			if len(k) > l {
 				l = len(k)
 			}
 		}
 	}
-	
+
 	sort.Strings(hs[0:i])
 	for j, h := range hs[0:i] {
-		fmt.Printf("%-*s", l + 1, h)
-		if (j + 1) % 7 == 0 {
+		fmt.Printf("%-*s", l+1, h)
+		if (j+1)%7 == 0 {
 			fmt.Println("")
 		}
 	}
-	if i % 7 != 0 {
+	if i%7 != 0 {
 		fmt.Println("")
 	}
 
@@ -150,12 +150,12 @@ func show_hosts() {
 
 	sort.Strings(hs[0:i])
 	for j, h := range hs[0:i] {
-		fmt.Printf("%-*s", l + 1, h)
-		if (j + 1) % 7 == 0 {
+		fmt.Printf("%-*s", l+1, h)
+		if (j+1)%7 == 0 {
 			fmt.Println("")
 		}
 	}
-	if i % 7 != 0 {
+	if i%7 != 0 {
 		fmt.Println("")
 	}
 }
@@ -175,13 +175,13 @@ func usage(prog string) {
 	fmt.Println("    view    Exec virt-viewer for a virtual")
 	fmt.Println("    ssh     Ssh to a physical/virtual")
 	fmt.Println("    alias   Show host info")
-	
+
 	fmt.Println("Examples:")
-	fmt.Printf("    %s ls    <phost|vhost>\n"       , prog)
-	fmt.Printf("    %s go    <phost|vhost>\n"       , prog)
-	fmt.Printf("    %s view  <vhost>\n"             , prog)
+	fmt.Printf("    %s ls    <phost|vhost>\n", prog)
+	fmt.Printf("    %s go    <phost|vhost>\n", prog)
+	fmt.Printf("    %s view  <vhost>\n", prog)
 	fmt.Printf("    %s ssh   <phost|vhost> <user>\n", prog)
-	fmt.Printf("    %s alias <phost|vhost>\n"       , prog)
+	fmt.Printf("    %s alias <phost|vhost>\n", prog)
 }
 
 func main() {
