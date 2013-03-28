@@ -177,7 +177,7 @@ func usage(prog string) {
 	fmt.Println("    alias   Show host info")
 
 	fmt.Println("Examples:")
-	fmt.Printf("    %s ls    <phost|vhost>\n", prog)
+	fmt.Printf("    %s ls    [phost|vhost]\n", prog)
 	fmt.Printf("    %s go    <phost|vhost>\n", prog)
 	fmt.Printf("    %s view  <vhost>\n", prog)
 	fmt.Printf("    %s ssh   <phost|vhost> <user>\n", prog)
