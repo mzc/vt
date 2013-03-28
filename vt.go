@@ -196,7 +196,7 @@ func main() {
 		return
 	}
 
-	conf := join_str(u.HomeDir, "/.config/", prog, "/", prog, ".json")
+	conf := join_str(u.HomeDir, "/.config/", prog, ".json")
 	err = read_hosts(conf)
 	if err != nil {
 		fmt.Println("Failed to read/parse", conf, ":", err)
