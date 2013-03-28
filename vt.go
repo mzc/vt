@@ -170,7 +170,7 @@ func show_users() {
 func usage(prog string) {
 	fmt.Printf("usage: %s <command> <args ...>\n", prog)
 	fmt.Println("The commands supported are:")
-	fmt.Println("    ls      List domains on a physical")
+	fmt.Println("    ls      List supported host names or list domains on a physical")
 	fmt.Println("    go      Exec virsh on a physical")
 	fmt.Println("    view    Exec virt-viewer for a virtual")
 	fmt.Println("    ssh     Ssh to a physical/virtual")
@@ -200,6 +200,11 @@ func main() {
 	err = read_hosts(conf)
 	if err != nil {
 		fmt.Println("Failed to read/parse", conf, ":", err)
+		return
+	}
+
+	if len(args) == 2 && args[1] == "ls" {
+		show_hosts()
 		return
 	}
 
