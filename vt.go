@@ -108,7 +108,21 @@ func ssh_hosts(addr, port, user, ssh_cmd string) error {
 	return cmd.Run()
 }
 
-func copy_id_hosts(addr, port, domain, user string) error {
+func scp_files(addr, port, user string, files []string) error {
+	uri := join_str(user, "@", addr, ":")
+
+	cmd_args := []string{"-P", port}
+	cmd_args = append(cmd_args, files...)
+	cmd_args = append(cmd_args, uri)
+
+	cmd := exec.Command("scp", cmd_args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	return cmd.Run()
+}
+
+func copy_id(addr, port, domain, user string) error {
 	uri := join_str(user, "@", addr)
 	cmd := exec.Command("ssh-copy-id", "-p", port, uri)
 	cmd.Stdin = os.Stdin
@@ -184,6 +198,7 @@ func usage(prog string) {
 	fmt.Println("    view    Exec virt-viewer for a virtual")
 	fmt.Println("    ssh     Ssh to a physical/virtual")
 	fmt.Println("    alias   Show host info")
+	fmt.Println("    copy    Copy files")
 	fmt.Println("    copy-id Copy Identify file")
 
 	fmt.Println("Examples:")
@@ -192,7 +207,8 @@ func usage(prog string) {
 	fmt.Printf("    %s view    <vhost>\n", prog)
 	fmt.Printf("    %s ssh     <phost|vhost> <user>\n", prog)
 	fmt.Printf("    %s alias   <phost|vhost>\n", prog)
-	fmt.Printf("    %s copy-id <phost|vhost>\n", prog)
+	fmt.Printf("    %s copy    <phost|vhost> <user> <fils...>\n", prog)
+	fmt.Printf("    %s copy-id <phost|vhost> <user\n", prog)
 }
 
 func main() {
@@ -267,6 +283,18 @@ func main() {
 		fmt.Println("port  :", h.port)
 		fmt.Println("phost :", h.phost)
 		fmt.Println("domain:", h.domain)
+	case "copy":
+		if len(args) < 5 {
+			usage(prog)
+			return
+		}
+		user, ok := extend_user[args[3]]
+		if !ok {
+			show_users()
+			return
+		}
+		files := args[4:len(args)]
+		err = scp_files(h.addr, h.port, user, files)
 	case "copy-id":
 		if len(args) < 4 {
 			usage(prog)
@@ -277,7 +305,7 @@ func main() {
 			show_users()
 			return
 		}
-		err = copy_id_hosts(h.addr, h.port, h.domain, user)
+		err = copy_id(h.addr, h.port, h.domain, user)
 	default:
 		usage(prog)
 	}
