@@ -108,12 +108,28 @@ func ssh_hosts(addr, port, user, ssh_cmd string) error {
 	return cmd.Run()
 }
 
-func scp_files(addr, port, user string, files []string) error {
+func scp_files_to(addr, port, user string, files []string) error {
 	uri := join_str(user, "@", addr, ":")
 
 	cmd_args := []string{"-P", port}
 	cmd_args = append(cmd_args, files...)
 	cmd_args = append(cmd_args, uri)
+
+	cmd := exec.Command("scp", cmd_args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+
+	return cmd.Run()
+}
+
+func scp_files_from(addr, port, user string, files []string) error {
+	uri := join_str(user, "@", addr, ":")
+
+	cmd_args := []string{"-P", port}
+	for _, f := range files {
+		cmd_args = append(cmd_args, join_str(uri, f))
+	}
+	cmd_args = append(cmd_args, ".")
 
 	cmd := exec.Command("scp", cmd_args...)
 	cmd.Stdin = os.Stdin
@@ -193,22 +209,24 @@ func show_users() {
 func usage(prog string) {
 	fmt.Printf("usage: %s <command> <args ...>\n", prog)
 	fmt.Println("The commands supported are:")
-	fmt.Println("    ls      List supported host names or list domains on a physical")
-	fmt.Println("    go      Exec virsh on a physical")
-	fmt.Println("    view    Exec virt-viewer for a virtual")
-	fmt.Println("    ssh     Ssh to a physical/virtual")
-	fmt.Println("    alias   Show host info")
-	fmt.Println("    copy    Copy files")
-	fmt.Println("    copy-id Copy Identify file")
+	fmt.Println("    ls        List supported host names or list domains on a physical")
+	fmt.Println("    go        Exec virsh on a physical")
+	fmt.Println("    view      Exec virt-viewer for a virtual")
+	fmt.Println("    ssh       Ssh to a physical/virtual")
+	fmt.Println("    alias     Show host info")
+	fmt.Println("    copy-from files")
+	fmt.Println("    copy-to   Copy files")
+	fmt.Println("    copy-id   Copy Identify file")
 
 	fmt.Println("Examples:")
-	fmt.Printf("    %s ls      [phost|vhost]\n", prog)
-	fmt.Printf("    %s go      <phost|vhost>\n", prog)
-	fmt.Printf("    %s view    <vhost>\n", prog)
-	fmt.Printf("    %s ssh     <phost|vhost> <user>\n", prog)
-	fmt.Printf("    %s alias   <phost|vhost>\n", prog)
-	fmt.Printf("    %s copy    <phost|vhost> <user> <fils...>\n", prog)
-	fmt.Printf("    %s copy-id <phost|vhost> <user\n", prog)
+	fmt.Printf("    %s ls        [phost|vhost]\n", prog)
+	fmt.Printf("    %s go        <phost|vhost>\n", prog)
+	fmt.Printf("    %s view      <vhost>\n", prog)
+	fmt.Printf("    %s ssh       <phost|vhost> <user>\n", prog)
+	fmt.Printf("    %s alias     <phost|vhost>\n", prog)
+	fmt.Printf("    %s copy-from <phost|vhost> <user> <fils...>\n", prog)
+	fmt.Printf("    %s copy-to   <phost|vhost> <user> <fils...>\n", prog)
+	fmt.Printf("    %s copy-id   <phost|vhost> <user\n", prog)
 }
 
 func main() {
@@ -283,7 +301,7 @@ func main() {
 		fmt.Println("port  :", h.port)
 		fmt.Println("phost :", h.phost)
 		fmt.Println("domain:", h.domain)
-	case "copy":
+	case "copy-to":
 		if len(args) < 5 {
 			usage(prog)
 			return
@@ -294,7 +312,19 @@ func main() {
 			return
 		}
 		files := args[4:len(args)]
-		err = scp_files(h.addr, h.port, user, files)
+		err = scp_files_to(h.addr, h.port, user, files)
+	case "copy-from":
+		if len(args) < 5 {
+			usage(prog)
+			return
+		}
+		user, ok := extend_user[args[3]]
+		if !ok {
+			show_users()
+			return
+		}
+		files := args[4:len(args)]
+		err = scp_files_from(h.addr, h.port, user, files)
 	case "copy-id":
 		if len(args) < 4 {
 			usage(prog)
