@@ -111,7 +111,8 @@ func ssh_hosts(addr, port, user, ssh_cmd string) error {
 func scp_files_to(addr, port, user string, files []string) error {
 	uri := join_str(user, "@", addr, ":")
 
-	cmd_args := []string{"-P", port}
+	cmd_args := []string{"-r"}
+	cmd_args = append(cmd_args, "-P", port)
 	cmd_args = append(cmd_args, files...)
 	cmd_args = append(cmd_args, uri)
 
