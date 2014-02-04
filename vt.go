@@ -25,6 +25,7 @@ var extend_user = map[string]string{
 	"r": "root",
 	"u": "ubuntu",
 	"m": "mulisu",
+	"c": "chaoma",
 }
 
 func join_str(s ...string) string {
