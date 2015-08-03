@@ -71,7 +71,7 @@ func is_phost(h Host) bool {
 }
 
 func default_user() string {
-	return extend_user["r"]
+	return extend_user["u"]
 }
 
 func ls_hosts(addr, port, user string) error {
